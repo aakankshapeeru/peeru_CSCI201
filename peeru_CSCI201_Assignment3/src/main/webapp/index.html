@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artist Search</title>
+<link rel="stylesheet" href="style.css">
+<style>
+#searchButton {
+	background-color: rgb(4, 48, 124);
+	color: white;
+	border-radius: 5px;
+}
+
+.artistResult {
+	text-align: center;
+}
+
+.starIcon {
+	cursor: pointer;
+	font-size: 24px;
+	color: gray;
+	display: block;
+	margin-top: 8px;
+}
+
+.starIcon.active {
+	color: gold;
+}
+</style>
+<script>
+function clearInput(){
+	document.getElementById("searchInput").value='';
+} 
+function artsyToken(callback){
+	var xhttp=new XMLHttpRequest();
+	xhttp.open("POST", "getToken", true);
+	xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhttp.onreadystatechange=function(){
+		if(xhttp.readyState==4 && xhttp.status==200){
+			const tokenRetrieved=JSON.parse(xhttp.responseText);
+			callback(tokenRetrieved.token);
+		}
+	};
+	xhttp.send();
+}
+function searchForArtist(event){
+	if (event) {
+        event.preventDefault(); 
+      }
+	if (document.querySelector("artistResult")) {
+	document.querySelector("artistResult").innerHTML = "";		
+	}
+	const q=document.getElementById("searchInput").value.trim();
+	console.log("Searching for artist:", q);
+	document.getElementById("loading_image").style.display="block";
+	artsyToken(function (token){
+		var xhttp=new XMLHttpRequest();
+		xhttp.open("GET", `https://api.artsy.net/api/search?q=${q}&size=10&type=artist`, true);
+		xhttp.setRequestHeader("X-XAPP-Token",token);
+		xhttp.onreadystatechange=function(){
+			if(xhttp.readyState==4 && xhttp.status==200){
+				document.getElementById("loading_image").style.display="none";
+				let resultList=JSON.parse(xhttp.responseText);
+				console.log(resultList);
+				displayResults(resultList);
+			}
+		}
+		xhttp.send();
+	});
+	
+}
+
+function displayResults(jsonResult) {
+	const artistDetails=document.querySelector('.artistResult');
+	artistDetails.innerHTML='';
+	const artistResult = jsonResult._embedded.results;
+	const artistList = [];
+
+	const resultContainer = document.querySelector(".resultList");
+	resultContainer.innerHTML = ""; 
+
+	if (artistResult.length === 0) {
+		resultContainer.innerHTML = "<p class='nullResults'>No results found.</p>";
+		
+		return;
+	}
+
+	for (let artist of artistResult) {
+		const artistID = artist._links.self.href.split('/').pop();
+		const artistName = artist.title;
+		let artistImage = artist._links.thumbnail.href;
+		if (artistImage === "/assets/shared/missing_image.png") {
+			artistImage = "images/artsy_logo.svg";
+		}
+		artistList.push({ ID: artistID, title: artistName, imageURL: artistImage });
+	}
+
+	
+	const scrollContainer = document.createElement("div");
+	scrollContainer.classList.add("artistScroll");
+
+	for (let artist of artistList) {
+		const card = document.createElement("div");
+		card.classList.add("artistCard");
+
+		const img = document.createElement("img");
+		img.src = artist.imageURL;
+		img.alt = artist.title;
+		img.classList.add("artistImage");
+
+		const name = document.createElement("p");
+		name.textContent = artist.title;
+		name.classList.add("artistName");
+
+		card.appendChild(img);
+		card.appendChild(name);
+		scrollContainer.appendChild(card);
+		card.addEventListener('click', function() {
+			  getArtistDetails(artist.ID);
+			});
+	}
+		
+	resultContainer.appendChild(scrollContainer);
+	
+}
+function getArtistDetails(artistID){
+	document.getElementById("loading_image").style.display="block";
+	artsyToken(function(token){
+		var xhttp=new XMLHttpRequest();
+		xhttp.open("GET", `https://api.artsy.net/api/artists/${artistID}`, true);
+		xhttp.setRequestHeader("X-XAPP-Token",token);
+		xhttp.onreadystatechange=function(){
+			if(xhttp.readyState==4 && xhttp.status==200){
+				document.getElementById("loading_image").style.display="none";
+				const resultList=JSON.parse(xhttp.responseText);
+				console.log(resultList);
+				displayArtistDetails(resultList);
+			}
+		}
+		xhttp.send();
+		
+	});
+}
+function displayArtistDetails(jsonResult){
+	const artistName=jsonResult.name;
+	const artistBday=jsonResult.birthday;
+	const artistDday=jsonResult.deathday;
+	const artistNationality=jsonResult.nationality;
+	const artistBio=jsonResult.biography;
+	const artistDetails=document.querySelector('.artistResult');
+	artistDetails.innerHTML='';
+	const star = document.createElement("span");
+	star.classList.add("starIcon");
+	star.innerHTML = "&#9734;"; 
+
+	const firstLine = `${artistName} (${artistBday || ""} - ${artistDday || ""})`;
+	const secondLine = `${artistNationality || ""}`;
+	const thirdLine = `${artistBio || ""}`;
+	let email=localStorage.getItem("email");
+	let loginStatus=localStorage.getItem("loginStatus");
+
+	const nameHeading = document.createElement("h2"); 
+
+	const nationalityHeading = document.createElement("h4");
+
+	const bioParagraph = document.createElement("p");
+	bioParagraph.textContent = thirdLine;
+
+	if (email && loginStatus === "logged-in") {
+		const star = document.createElement("div");
+		star.classList.add("starIcon");
+		star.innerHTML = "&#9734;"; 
+		
+		 checkFavoriteStatus(jsonResult,star);
+		
+		star.addEventListener("click", function () {
+			const artistID = jsonResult.id || jsonResult.slug || artistName.replace(/\s+/g, '-');
+			const email = localStorage.getItem("email");
+	const action = star.classList.contains("active") ? "unfavorite" : "favorite";
+			const servletURL = action === "favorite" ? "insertF" : "removeF"; 
+			
+			fetch(servletURL, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded"
+				},
+				body: "artistID=" + encodeURIComponent(artistID) +
+				      "&username=" + encodeURIComponent(email) +
+				      "&action=" + encodeURIComponent(action)
+			})
+			.then(response => response.text())
+			.then(data => {
+				console.log("InsertFavouriteServlet response:", data);
+
+				
+				if (servletURL === "insertF") {
+					star.classList.add("active");
+					star.innerHTML = "&#9733;"; 
+				} else {
+					star.classList.remove("active");
+					star.innerHTML = "&#9734;"; 
+				}
+			})
+			.catch(error => {
+				console.error("Error calling InsertServlet:", error);
+			});
+		});
+		const artistHeading=document.createElement("div");
+		artistHeading.style.display="flex";
+		artistHeading.style.alignItems="center";
+		artistHeading.style.justifyContent="center";
+		nameHeading.textContent=`${artistName || ""}`;
+		artistHeading.appendChild(nameHeading);
+		artistHeading.appendChild(star);
+		artistDetails.appendChild(artistHeading);
+		
+		if(!artistNationality && !artistBday && !artistDday){
+			nationalityHeading.textContent=``;
+		}
+		else{
+			nationalityHeading.textContent=`${artistNationality || ""}, ${artistBday || ""} - ${artistDday || ""}`;
+		}
+		artistDetails.appendChild(nationalityHeading);
+	}
+	else{
+		nameHeading.textContent=firstLine;
+		nationalityHeading.textContent=secondLine;
+		artistDetails.appendChild(nameHeading);
+		artistDetails.appendChild(nationalityHeading);
+	}
+
+	artistDetails.appendChild(bioParagraph);
+	
+} 
+
+function checkFavoriteStatus(jsonResult, star) {
+    const artistID = jsonResult.id || jsonResult.slug || artistName.replace(/\s+/g, '-');
+    const email = localStorage.getItem("email");
+    star.classList.remove("active");
+    star.innerHTML = "&#9734;"; 
+  	let requestBody =`username=${email}`;
+  	if (artistID) {
+      	requestBody+=`&artistID=${artistID}`;
+  	}
+
+    fetch("getF", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: requestBody
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Favorites list received:", data);
+		const isFavorite = data.includes(artistID);
+
+        if (isFavorite) {
+            star.classList.add("active");
+            star.innerHTML = "&#9733;"; 
+        } else {
+            star.classList.remove("active");
+            star.innerHTML = "&#9734;";
+        }
+    })
+    .catch(error => {
+        console.error("Error checking favorite status:", error);
+    });
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+	const paramString=window.location.search;
+	const searchP=new URLSearchParams(paramString);
+	if(searchP.get('loggedIn')==='true'){
+		localStorage.setItem("email",searchP.get('user'));
+		localStorage.setItem("loginStatus", "logged-in");
+	}
+	let email=localStorage.getItem("email");
+	let status=localStorage.getItem("loginStatus");
+	if(email && status==='logged-in'){
+		document.getElementById('LoginButton').textContent = 'Favourites';
+		document.getElementById('RegisterButton').textContent = 'LogOut';
+		document.getElementById('RegisterButton').onclick= () =>{
+			localStorage.clear();
+			document.getElementById('LoginButton').textContent='Login';
+			document.getElementById('RegisterButton').textContent='Register'; 
+			window.location.href="index.html";
+		};
+		document.getElementById('LoginButton').onclick=()=>{
+			window.location.href="favourites.html";
+		};
+		
+	}
+	else{
+		document.getElementById('RegisterButton').onclick= () =>{
+			window.location.href="register.html";
+		};
+		document.getElementById('LoginButton').onclick=()=>{
+			window.location.href="login.html";
+		};
+	}
+});
+
+
+</script>
+</head>
+<body>
+	<header>
+		<div class="headTitle">Artist Search</div>
+		<div class="headerButtons">
+			<a href="index.html"><button id="searchButton">Search</button></a>
+			<button id="LoginButton">Login</button>
+			<button id="RegisterButton">Register</button>
+		</div>
+	</header>
+	<div class="searchContainer">
+		<form onsubmit="searchForArtist(event)">
+
+			<button type="submit" id="searchIcon"
+				style="background: none; border: none;">
+				<img src="images/search_icon.png" alt="search-icon" width="22px"
+					height="22px">
+			</button>
+			<input type="text" id="searchInput" style="outline: none;"
+				placeholder="Please enter an artist name." required>
+			<button id="clearButton" onclick="clearInput()"
+				style="border: none; background-color: white;">
+				<img src="images/clear_icon.png" alt="clear-icon">
+			</button>
+		</form>
+	</div>
+	<div>
+		<img id="loading_image" src="images/loading.gif" alt="loading">
+	</div>
+	<div class="resultList"></div>
+	<div class="artistResult"></div>
+	<footer>
+		<p>
+			Powered by <img src="images/artsy_logo.svg" alt="logo"><a
+				href="https://www.artsy.net/" target="_blank"
+				style="color: white; text-decoration: none;">Artsy</a>
+		</p>
+	</footer>
+</body>
+</html>

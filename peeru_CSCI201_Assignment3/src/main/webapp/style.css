@@ -1,0 +1,183 @@
+html, body {
+	height: 100%;
+}
+
+body {
+	font-family: sans-serif;
+	display: flex;
+	flex-direction: column;
+}
+
+header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background-color: #f0f0f0;
+}
+
+.headTitle {
+	margin-left: 10px;
+}
+
+.searchContainer {
+	display: flex;
+	width: 630px;
+	height: 54px;
+	margin-top: 50px;
+	border-radius: 35px;
+	font-size: 14px;
+	padding: 10px;
+	box-sizing: border-box;
+	border: 2px solid #ccc;
+	transition: border-color 0.2s;
+	justify-content: center;
+	align-items: center;
+	margin-left: 430px;
+}
+
+.searchContainer:focus-within {
+	border-color: orange;
+}
+
+.searchContainer img {
+	width: 20px;
+	height: 20px;
+	margin-top: 9px;
+}
+
+#searchInput {
+	width: 500px;
+	border: none;
+	padding: 10px;
+	margin-bottom: 7px;
+}
+
+#searchButton, #LoginButton, #RegisterButton, #favouriteButton {
+	background-color: #f0f0f0;
+	border: none;
+	color: #686868;
+	padding: 12px;
+	font-size: 15px;
+}
+
+#searchIcon, #clearButton {
+	opacity: 0.5;
+	transition: opacity 0.2s ease;
+}
+
+#searchIcon:hover, #clearButton:hover {
+	opacity: 1;
+}
+
+.container {
+	justify-content: center;
+	align-items: center;
+	width: 400px;
+	height: 400px;
+	margin-top: 50px;
+	margin-left: 550px;
+	border-radius: 5px;
+	border: 2px solid #ccc;
+	padding: 10px;
+}
+
+.container input {
+	display: block;
+	margin-bottom: 10px;
+	width: 100%;
+	border-radius: 5px;
+	font-size: 14px;
+	padding: 10px;
+	border: 2px solid #ccc;
+	box-sizing: border-box;
+}
+
+#LogIn, #Register {
+	background-color: rgb(83, 119, 168);
+	color: white;
+	border: none;
+}
+
+#ERRORM {
+	color: red;
+}
+
+.temp {
+	margin-left: 42%;
+}
+
+#loading_image {
+	width: 50px;
+	height: 60px;
+	margin-left: 720px;
+	display: none;
+}
+
+.nullResults {
+	background-color: rgb(193, 193, 193);
+	border-radius: 10px;
+	padding: 20px;
+	text-align: center;
+	width: 700px;
+	margin-left: 370px;
+	margin-top: 50px;
+}
+
+.artistScroll {
+	display: flex;
+	overflow-x: auto;
+	padding: 10px;
+	gap: 10px;
+	scroll-snap-type: x mandatory;
+	margin-top: 50px;
+}
+
+.artistCard {
+	background-color: #205375;
+	width: 180px;
+	height: 270px;
+	padding: 7px;
+	text-align: center;
+	color: white;
+	scroll-snap-align: start;
+	flex-shrink: 0;
+}
+
+.artistCard:hover {
+	background-color: #112B3C;
+}
+
+.artistImage {
+	width: 175px;
+	height: 175px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 3px solid white;
+	margin-top: 3px;
+	margin-bottom: 10px;
+}
+
+.warningImage {
+	background-image: url('images/input_warning.png');
+	background-repeat: no-repeat;
+	background-size: 20px 20px;
+	background-position: right 10px center;
+}
+
+.artistName {
+	font-size: 1rem;
+}
+
+footer {
+	background-color: #000080;
+	display: flex;
+	color: white;
+	margin-top: auto;
+	justify-content: center;
+	align-items: center;
+}
+
+footer img {
+	width: 15px;
+	height: 15px;
+}

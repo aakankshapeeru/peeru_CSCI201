@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artist Search</title>
+<link rel="stylesheet" href="style.css">
+<style>
+#LoginButton{
+	background-color:rgb( 4 , 48 ,124);
+	color:white;
+	border-radius:5px;
+}
+.container{
+	height:340px;
+}
+
+
+#emailError, #passwordError{
+	color:red;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+	const paramString=window.location.search;
+	const searchP=new URLSearchParams(paramString);
+	if(searchP.get('error')==='invalid'){
+		document.getElementById('ERRORM').textContent='Password or email is incorrect';
+	}
+});
+document.addEventListener("submit",function(e){
+	var emailFormat=/\S+@\S+\.\S+/;
+	let email=document.getElementById('username');
+	let password=document.getElementById('password');
+	let emailError=document.getElementById('emailError');
+	let passwordError=document.getElementById('passwordError');
+	emailError.textContent='';
+	email.removeClassList("warningImage");
+	password.removeClassList("warningImage"); 
+	passwordError.textContent='';
+	email.style.border='2px solid #ccc';
+	password.style.border='2px solid #ccc';
+	let canSubmit=true;
+	if(!email.value || !emailFormat.test(email.value)){
+		emailError.textContent='Email must be valid.';
+		email.style.borderColor='red';
+		email.classList.add("warningImage");
+		console.log("added warning");
+		canSubmit=false;
+	}
+	if(!password.value){
+		passwordError.textContent='Password is required';
+		password.style.borderColor ='red';
+		password.classList.add("warningImage");
+		canSubmit=false;
+	}
+	if(!canSubmit){
+		e.preventDefault();
+	}
+});
+document.addEventListener("DOMContentLoaded", function(){
+	let email=localStorage.getItem("email");
+	let status=localStorage.getItem("loginStatus");
+	if(status==='logged-in'){
+		document.getElementById('LoginButton').textContent='Favourites';
+		document.getElementById('RegisterButton').textContent='LogOut';
+		document.getElementById('RegisterButton').onclick= () =>{
+			localStorage.clear();
+			document.getElementById('LoginButton').textContent='Login';
+			document.getElementById('RegisterButton').textContent='Register'; 
+			window.location.href="index.html";
+		}
+	}
+});
+
+
+</script>
+</head>
+<body>
+<header>
+<div class="headTitle">Artist Search</div>
+<div class="headerButtons">
+<a href="index.html"><button id="searchButton">Search</button></a>
+<a href="login.html"><button id="LoginButton">Login</button></a>
+<a href="register.html"><button id="RegisterButton">Register</button></a>
+</div>
+</header>
+<div class="container">
+<form action="validate" method="POST" novalidate>
+
+<h1>Login</h1>
+<label for="username">Email address</label>
+<input type="email" id="username" name="username" placeholder="Enter email" pattern="[^ @]+@[^ @]+\.[a-zA-Z]{2,6}" required>
+<p id="emailError"></p>
+<label for="password">Password</label>
+<input type="password" id="password" name="password" placeholder="Password" required>
+<p id="passwordError"></p>
+<p id="ERRORM"></p>
+
+
+
+<input type="submit" id="LogIn" value="Log in">
+
+</form>
+</div>
+<div class="temp">
+<p>Don't have an account yet?<a href="register.html">Register</a></p>
+
+</div>
+<footer>
+<p>Powered by <img src="images/artsy_logo.svg" alt="logo"><a href="https://www.artsy.net/" target="_blank" style="color:white; text-decoration:none;">Artsy</a></p>
+</footer>
+</body>
+</html>

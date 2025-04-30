@@ -1,0 +1,34 @@
+{
+  "data": [
+    {
+      "name": "Van Gogh",
+      "exhibit": "The Roulin Family Portraits",
+      "localDate": "2025-03-30",
+      "museum": "Museum of Fine Arts, Boston"
+    },
+    {
+      "name": "Lorna Simpson",
+      "exhibit": "Flower pots",
+      "localDate": "2020-05-01",
+      "museum": "The Metropolitan Museum of Art, New York"
+    },
+    {
+      "name": "Kerry James Marshall",
+      "exhibit": "Retrospective",
+      "localDate": "2025-09-20",
+      "museum": "Royal Academy of Arts, London"
+    },
+    {
+      "name": "Cecily Brown",
+      "exhibit": "Themes and Variations",
+      "localDate": "2025-03-09",
+      "museum": "The Barnes Foundation, Philadelphia"
+    },
+    {
+      "name": "Caspar David Friedrich",
+      "exhibit": "The Soul of Nature",
+      "localDate": "2025-02-08",
+      "museum": "The Metropolitan Museum of Art, New York"
+    }
+  ]
+}
